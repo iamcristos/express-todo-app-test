@@ -1,0 +1,26 @@
+{
+  "name": "expresstest-app",
+  "version": "1.0.0",
+  "description": "a simple rest api with testing",
+  "main": "app.js",
+  "scripts": {
+    "start" : "node app.js",
+    "test": "export NODE_ENV=test || SET \"NODE_ENV=test\" && mocha test/**/*.test.js",
+    "test-watch": "nodemon --exec \"npm test\""
+  },
+  "author": "Cristos",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.18.3",
+    "express": "^4.16.4",
+    "lodash": "^4.17.11",
+    "mongodb": "^3.1.10",
+    "mongoose": "^5.4.1",
+    "validator": "^10.10.0"
+  },
+  "devDependencies": {
+    "expect": "^1.20.2",
+    "mocha": "^5.2.0",
+    "supertest": "^3.3.0"
+  }
+}
