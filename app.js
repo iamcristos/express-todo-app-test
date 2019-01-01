@@ -1,11 +1,14 @@
+require('./config/config')
 const express= require('express');
 const bodyParser= require('body-parser');
+const _= require('lodash');
 const {mongoose}= require('./db/db');
 let {Todo}= require('./models/todo');
 let {User}= require('./models/user');
 const {ObjectID}= require('mongodb')
 const app= express();
-
+// setting up port
+const port= process.env.PORT;
 // middleware
 app.use(bodyParser.json());
 
@@ -35,13 +38,42 @@ app.get('/todo/:id', (req,res)=>{
     if(!ObjectID.isValid(_id)) return res.status(404).send('Id does not exist')
     Todo.findById({_id}).then((todo)=>{
         if(!todo) return res.status(404).send()
-        res.send(todo)
+        res.send({todo})
     }).catch((e)=>{
         res.status(400).send(e)
     })
 });
 
-app.listen(3000,()=>{
+// delete todo route
+app.delete('/todo/:id', (req,res)=>{
+    let _id= req.params.id;
+    if (!ObjectID.isValid(_id)) return res.status(404).send('invalid id');
+    Todo.findByIdAndRemove({_id}).then((todo)=>{
+        if (!todo) return res.status(404).send('no Todo with such id')
+        res.status(200).send({todo})
+    }).catch((e)=>res.status(400).send(e));
+});
+
+// update todo
+
+app.patch('/todo/:id', (req,res)=>{
+    let _id= req.params.id
+    let body= _.pick(req.body, ['text','completed'])
+
+    //setting our completed with time
+    if(_.isBoolean(body.completed) && body.completed) {
+        body.completedAt= new Date().getTime()
+    } else {
+        body.completed= false;
+        body.completedAt= null
+    }
+    if (!ObjectID.isValid(_id)) return res.status(404).send('invalid id');
+    Todo.findByIdAndUpdate({_id},{$set:body},{new:true}).then((todo)=>{
+        if (!todo) return res.status(404).send('no Todo with such id')
+        res.send({todo})
+    }).catch((e)=> res.status(400).send(e))
+})
+app.listen(port,()=>{
     console.log('server started')
 });
 

@@ -4,7 +4,7 @@ const {ObjectID}= require('mongodb');
 const app= require('./../app').app;
 let {Todo}= require('./../models/todo');
 
-let seedTodo= [{_id:new ObjectID(),text:'Hello 1'}, {_id:new ObjectID(),text:'Hello 2'}]
+let seedTodo= [{_id:new ObjectID(),text:'Hello 1'}, {_id:new ObjectID(),text:'Hello 2',completed:true,completedAt:123}]
 
 beforeEach((done)=>{
     Todo.remove({}).then((res)=>{
@@ -67,7 +67,8 @@ describe('GET /todo/:id',()=>{
             .get(`/todo/${seedTodo[0]._id.toHexString()}`)
             .expect(200)
             .expect((res)=>{
-                expect(res.body.text).toBe(`${seedTodo[0].text}`)
+                console.log(res.body)
+                expect(res.body.todo.text).toBe(`${seedTodo[0].text}`)
             })
             .end(done)
     });
@@ -86,5 +87,76 @@ describe('GET /todo/:id',()=>{
             .expect(404)
             .end(done)
 
+    })
+});
+
+
+describe('DELETE /todo/:id', ()=>{
+    it ('should delete todo by the id',(done)=>{
+        let hexId= seedTodo[0]._id.toHexString()
+        request(app)
+            .delete(`/todo/${seedTodo[0]._id.toHexString()}`)
+            .expect(200)
+            .expect((res)=>{
+                // console.log((res.body.todo._id))
+                expect(res.body.todo._id).toBe(hexId)
+            })
+            .end((err,res)=>{
+                if (err) return done(err)
+                Todo.findById(hexId).then((todo)=>{
+                    expect(todo).toNotExist()
+                    done()
+                }).catch((e)=> done(e))
+            });
+    });
+
+    it('should return 404 if id doesnt exist',(done)=>{
+        request(app)
+            .delete(`/todo/${new ObjectID().toHexString()}`)
+            .expect(404)
+            .end(done)
+    });
+
+    it('should return 404 if id is invalid',(done)=>{
+        request(app)
+            .delete(`/todo/123`)
+            .expect(404)
+            .end(done)
+    });
+});
+
+describe('UPDATE /todo/:id', ()=>{
+    it('should find todo by id and update', (done)=>{
+        let _id= seedTodo[0]._id.toHexString();
+        let body= {
+            text: 'Hello how are you',
+            completed: true
+        } 
+        request(app)
+            .patch(`/todo/${_id}`)
+            .send(body)
+            .expect(200)
+            .expect((res)=>{
+                expect(res.body.todo).toInclude(body)
+                expect(res.body.todo.completedAt).toBeA('number')
+            })
+            .end(done)
+    });
+
+    it('should set completed to false', (done)=>{
+        let _id= seedTodo[1]._id.toHexString();
+        let body= {
+            text: 'Hello who are yoy',
+            completed: false
+        } 
+        request(app)
+            .patch(`/todo/${_id}`)
+            .send(body)
+            .expect(200)
+            .expect((res)=>{
+                expect(res.body.todo).toInclude(body)
+                expect(res.body.todo.completedAt).toNotExist()
+            })
+            .end(done)
     })
 })
