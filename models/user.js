@@ -50,6 +50,25 @@ userSchema.methods.genAuthentication= function() {
    return user.save().then(()=>{
         return token
     })
+};
+
+userSchema.statics.findByToken= function(token){
+    let User=this;
+    let decode; 
+
+    try {
+       decode= jwt.verify(token, '123abc')
+        
+    } catch (error) {
+        return Promise.reject()
+    }
+    return User.findOne({
+        '_id' : decode._id,
+        'tokens.token' : token,
+        'tokens.access':'auth'
+
+    })
+
 }
 
 let User= mongoose.model('User', userSchema);
