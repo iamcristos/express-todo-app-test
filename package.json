@@ -4,7 +4,7 @@
   "description": "a simple rest api with testing",
   "main": "app.js",
   "scripts": {
-    "start" : "node app.js",
+    "start": "node app.js",
     "test": "export NODE_ENV=test || SET \"NODE_ENV=test\" && mocha test/**/*.test.js",
     "test-watch": "nodemon --exec \"npm test\""
   },
@@ -12,7 +12,10 @@
   "license": "ISC",
   "dependencies": {
     "body-parser": "^1.18.3",
+    "crypto-js": "^3.1.9-1",
+    "cryptojs": "^2.5.3",
     "express": "^4.16.4",
+    "jsonwebtoken": "^8.4.0",
     "lodash": "^4.17.11",
     "mongodb": "^3.1.10",
     "mongoose": "^5.4.1",

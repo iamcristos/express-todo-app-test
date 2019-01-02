@@ -72,6 +72,21 @@ app.patch('/todo/:id', (req,res)=>{
         if (!todo) return res.status(404).send('no Todo with such id')
         res.send({todo})
     }).catch((e)=> res.status(400).send(e))
+});
+
+// users route
+
+
+// users post route
+app.post('/user', (req,res)=>{
+    let body= _.pick(req.body,['email', 'password']);
+    let user= new User(body);
+    user.save().then((user)=>{
+        // res.send(user)
+       return user.genAuthentication()
+    }).then((token)=>{
+        res.header('x-auth',token).send(user)
+    }).catch((e)=>res.status(400).send(e))
 })
 app.listen(port,()=>{
     console.log('server started')
